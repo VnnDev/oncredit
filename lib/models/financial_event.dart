@@ -1,3 +1,5 @@
+// lib/models/financial_event.dart
+
 enum FinancialEventType { purchase, payment }
 
 class FinancialEvent {

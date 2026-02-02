@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import '../config/app_config.dart';
 import '../templates/appbar.dart';
-import '../templates/drawer.dart';
 import '../services/finance_service.dart';
 import '../services/client_service.dart';
 import '../models/client.dart';
+import '../tools/formatters.dart';
 import 'client_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   final FinanceService _financeService = FinanceService();
   final ClientService _clientService = ClientService();
 
+  final TextEditingController _searchController = TextEditingController();
   String _search = '';
 
   @override
@@ -30,10 +31,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MyAppBar(),
-      drawer: const MyDrawer(),
       body: Column(
         children: [
           // Identificação da base de dados
@@ -69,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'R\$ ${balance.toStringAsFixed(2)}',
+                        Formatters.currencyFormat.format(balance),
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -158,10 +164,22 @@ class _HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextField(
+        controller: _searchController,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search),
           hintText: 'Pesquisar cliente...',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          suffixIcon: _search.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _search = '';
+                    });
+                  },
+                )
+              : null,
         ),
         onChanged: (value) {
           setState(() {

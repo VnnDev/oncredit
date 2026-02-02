@@ -1,8 +1,12 @@
+// lib/pages/client_history_page.dart
+
 import 'package:flutter/material.dart';
 import '../models/client.dart';
 import '../models/financial_event.dart';
 import '../services/finance_service.dart';
 import '../templates/appbar.dart';
+
+import '../tools/formatters.dart';
 
 class ClientHistoryPage extends StatelessWidget {
   final Client client;
@@ -68,12 +72,9 @@ class ClientHistoryPage extends StatelessWidget {
                           color: isPurchase ? Colors.red : Colors.green,
                         ),
                         title: Text(item.description),
-                        subtitle: Text(
-                          item.date.toLocal().toString().substring(0, 10),
-                        ),
+                        subtitle: Text(Formatters.dateFormat.format(item.date)),
                         trailing: Text(
-                          (isPurchase ? '- ' : '+ ') +
-                              'R\$ ${item.value.toStringAsFixed(2)}',
+                          '${isPurchase ? '- ' : '+ '}${Formatters.currencyFormat.format(item.value)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: isPurchase ? Colors.red : Colors.green,
@@ -143,7 +144,7 @@ class ClientHistoryPage extends StatelessWidget {
         children: [
           Text(label),
           Text(
-            'R\$ ${value.toStringAsFixed(2)}',
+            Formatters.currencyFormat.format(value),
             style: TextStyle(
               fontWeight: bold ? FontWeight.bold : FontWeight.normal,
             ),

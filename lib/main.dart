@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
 
       routes: {
         // Página inicial
-        '/': (context) => const HomePage(),
+        '/': (context) => HomePage(),
       },
     );
   }

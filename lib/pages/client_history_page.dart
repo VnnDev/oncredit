@@ -77,6 +77,7 @@ class ClientHistoryPage extends StatelessWidget {
                           '${isPurchase ? '- ' : '+ '}${Formatters.currencyFormat.format(item.value)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
+                            fontSize: 16,
                             color: isPurchase ? Colors.red : Colors.green,
                           ),
                         ),
@@ -120,7 +121,7 @@ class ClientHistoryPage extends StatelessWidget {
                         _summaryLine('Total pago', summary['payments']!),
                         const Divider(),
                         _summaryLine(
-                          'Saldo atual',
+                          'Débito atual',
                           summary['balance']!,
                           bold: true,
                         ),

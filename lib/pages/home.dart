@@ -7,7 +7,6 @@ import '../services/finance_service.dart';
 import '../services/client_service.dart';
 import '../models/client.dart';
 import '../tools/formatters.dart';
-import 'client_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -121,12 +120,7 @@ class _HomePageState extends State<HomePage> {
                       title: Text(client.name),
                       subtitle: Text(client.cpf),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ClientPage(client: client),
-                          ),
-                        );
+                        debugPrint('Selecionou ${client.name}');
                       },
                     );
                   },

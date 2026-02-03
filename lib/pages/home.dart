@@ -42,72 +42,116 @@ class _HomePageState extends State<HomePage> {
       appBar: MyAppBar(),
       body: Column(
         children: [
-          // Resumo
-          Card(
-            margin: const EdgeInsets.all(16),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: const [
-                  Text('Total a receber'),
-                  SizedBox(height: 8),
-                  Text(
-                    'R\$ 249,60',
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // Identificação da base de dados
+          Align(
+            alignment: Alignment.centerRight,
+            heightFactor: 1,
+            child: Text(_status, style: const TextStyle(fontSize: 14)),
           ),
 
-          // Busca
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                hintText: 'Buscar cliente',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+          // --- Saldo ---
+          FutureBuilder<double>(
+            future: _financeService.getTotalBalance(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              final balance = snapshot.data!;
+
+              return Card(
+                margin: const EdgeInsets.all(16),
+                color: Colors.deepPurple.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Saldo total a receber',
+                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        Formatters.currencyFormat.format(balance),
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
+
+          // --- Busca ---
+          _buildSearchField(),
 
           const SizedBox(height: 8),
 
-          // Lista
+          // --- Lista de clientes ---
           Expanded(
-            child: ListView(
-              children: const [
-                ListTile(
-                  leading: CircleAvatar(child: Icon(Icons.person)),
-                  title: Text('Maria Aparecida'),
-                  subtitle: Text('Saldo: R\$ 139,80'),
-                  trailing: Icon(Icons.chevron_right),
-                ),
-                ListTile(
-                  leading: CircleAvatar(child: Icon(Icons.person)),
-                  title: Text('João Carlos'),
-                  subtitle: Text('Saldo: R\$ 109,80'),
-                  trailing: Icon(Icons.chevron_right),
-                ),
-              ],
+            child: FutureBuilder<List<Client>>(
+              future: _clientService.getClients(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final clients = snapshot.data!
+                    .where((c) => c.name.toLowerCase().contains(_search))
+                    .toList();
+
+                if (clients.isEmpty) {
+                  return const Center(child: Text('Nenhum cliente encontrado'));
+                }
+
+                return ListView.builder(
+                  itemCount: clients.length,
+                  itemBuilder: (context, index) {
+                    final client = clients[index];
+
+                    return ListTile(
+                      leading: const CircleAvatar(child: Icon(Icons.person)),
+                      title: Text(client.name),
+                      subtitle: Text(client.cpf),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ClientPage(client: client),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
             ),
           ),
 
-          // Botão
+          // Novo cliente
           Padding(
             padding: const EdgeInsets.all(16),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                icon: const Icon(Icons.person_add),
-                label: const Text('Novo cliente'),
-                onPressed: null, // depois ligamos
+                icon: const Icon(Icons.person_add, size: 22),
+                label: const Text(
+                  'Novo cliente',
+                  style: TextStyle(fontSize: 18),
+                ),
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
               ),
             ),
           ),
@@ -115,7 +159,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
 
   Widget _buildSearchField() {
     return Padding(
@@ -128,14 +171,14 @@ class _HomePageState extends State<HomePage> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           suffixIcon: _search.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _search = '';
-                    });
-                  },
-                )
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              setState(() {
+                _search = '';
+              });
+            },
+          )
               : null,
         ),
         onChanged: (value) {
